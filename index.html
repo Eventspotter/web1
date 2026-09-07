@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>💖 cute choice · yes or no</title>
     <style>
         * {
@@ -11,8 +11,16 @@
             box-sizing: border-box;
         }
 
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;              /* 🔒 locks fullscreen, no scroll */
+            position: fixed;               /* keeps viewport locked */
+            top: 0;
+            left: 0;
+        }
+
         body {
-            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -21,39 +29,10 @@
             background-attachment: fixed;
             padding: 1.5rem;
             position: relative;
-            overflow-x: hidden;
+            overflow: hidden;              /* extra safety */
         }
 
         /* CUTE BACKGROUND — floating pastel shapes */
-        body::before,
-        body::after {
-            content: "🌸";
-            position: fixed;
-            font-size: 4.5rem;
-            opacity: 0.2;
-            pointer-events: none;
-            z-index: 0;
-            transform: rotate(-10deg);
-        }
-
-        body::before {
-            top: 5%;
-            left: 3%;
-            font-size: 6rem;
-            content: "🌷";
-            opacity: 0.15;
-            transform: rotate(15deg);
-        }
-
-        body::after {
-            bottom: 5%;
-            right: 2%;
-            font-size: 7rem;
-            content: "☁️";
-            opacity: 0.15;
-            transform: rotate(5deg);
-        }
-
         .bg-deco {
             position: fixed;
             font-size: 3rem;
@@ -62,11 +41,6 @@
             z-index: 0;
             user-select: none;
         }
-
-        .bg-deco:nth-child(1) { top: 15%; left: 12%; content: "✨"; font-size: 5rem; }
-        .bg-deco:nth-child(2) { bottom: 20%; right: 10%; content: "🐣"; font-size: 4.2rem; }
-        .bg-deco:nth-child(3) { top: 45%; left: 5%; content: "🍬"; font-size: 4.8rem; }
-        .bg-deco:nth-child(4) { bottom: 35%; right: 6%; content: "🦋"; font-size: 4rem; }
 
         /* main card – glassmorphism */
         .card {
@@ -85,9 +59,9 @@
             text-align: center;
             border: 2px solid rgba(255, 255, 255, 0.5);
             transition: all 0.2s ease;
+            margin: 0 1rem;
         }
 
-        /* big message */
         .big-message {
             font-size: 3.8rem;
             font-weight: 700;
@@ -102,7 +76,6 @@
             filter: drop-shadow(0 4px 8px rgba(255, 140, 180, 0.2));
         }
 
-        /* button container */
         .button-group {
             display: flex;
             justify-content: center;
@@ -113,7 +86,6 @@
             position: relative;
         }
 
-        /* base button style */
         .btn {
             border: none;
             background: white;
@@ -134,6 +106,7 @@
             min-width: 140px;
             position: relative;
             transform: translateY(-2px);
+            touch-action: manipulation;
         }
 
         .btn:active {
@@ -141,7 +114,6 @@
             box-shadow: 0 4px 0 #b38b9b;
         }
 
-        /* YES button */
         .btn-yes {
             background: #ffd9e6;
             color: #772c47;
@@ -159,7 +131,6 @@
             box-shadow: 0 4px 0 #b87c91;
         }
 
-        /* NO button – will be positioned absolutely by JS, but we keep base style */
         .btn-no {
             background: #e3f0ff;
             color: #2d4a6b;
@@ -168,7 +139,7 @@
             position: relative; /* will be overridden by JS to 'fixed' */
             cursor: pointer;
             z-index: 999;
-            touch-action: none; /* prevent scroll interference on mobile */
+            touch-action: none;
         }
 
         .btn-no:hover {
@@ -182,7 +153,7 @@
         }
 
         @media (max-width: 500px) {
-            .card { padding: 2rem 1.5rem 2.8rem; }
+            .card { padding: 2rem 1.5rem 2.8rem; margin: 0 0.5rem; }
             .big-message { font-size: 2.8rem; }
             .btn { padding: 0.8rem 1.8rem; font-size: 1.5rem; min-width: 110px; }
             .button-group { gap: 1.5rem; }
@@ -208,7 +179,7 @@
     </style>
 </head>
 <body>
-    <!-- decorative background elements -->
+    <!-- decorative background elements (fixed) -->
     <div class="bg-deco" style="top:12%; left:8%;">🌸</div>
     <div class="bg-deco" style="bottom:18%; right:5%;">🌼</div>
     <div class="bg-deco" style="top:38%; left:4%;">🍭</div>
@@ -223,10 +194,7 @@
         </div>
 
         <div class="button-group" id="buttonGroup">
-            <!-- YES button -->
             <button class="btn btn-yes" id="yesBtn">💖 YES</button>
-
-            <!-- NO button – will be placed beside YES initially by JS -->
             <button class="btn btn-no" id="noBtn">💔 NO</button>
         </div>
 
@@ -239,9 +207,8 @@
         (function() {
             const yesBtn = document.getElementById('yesBtn');
             const noBtn = document.getElementById('noBtn');
-            const buttonGroup = document.getElementById('buttonGroup');
 
-            // ---- YES button: redirect to a "message page" ----
+            // ---- YES button: opens a cute message in new window ----
             yesBtn.addEventListener('click', function(e) {
                 const messageHTML = `
                 <!DOCTYPE html>
@@ -259,6 +226,7 @@
                         font-family: 'Segoe UI', 'Quicksand', sans-serif;
                         padding: 2rem;
                         text-align: center;
+                        overflow: hidden;
                     }
                     .msg-box {
                         background: rgba(255, 255, 255, 0.6);
@@ -297,6 +265,7 @@
                         box-shadow: 0 6px 0 #c292a5;
                         transition: 0.08s ease;
                         border: 2px solid white;
+                        cursor: pointer;
                     }
                     .back-link:active { transform: translateY(4px); box-shadow: 0 2px 0 #c292a5; }
                 </style>
@@ -305,71 +274,58 @@
                     <div class="msg-box">
                         <span class="emoji-big">🥰💖</span>
                         <h1>YES!</h1>
-                        <p>you made my day!<br>💗 I love u soo much 💗</p>
+                        <p>you made my day!<br>💗 I love u soo much Ruhika 💗</p>
                         <p style="font-size:2.6rem; margin-top:0.8rem;">✨🌷✨</p>
-                        <a href="#" class="back-link" onclick="window.close(); return false;">❤️ close this ❤️</a>
+                        <div class="back-link" onclick="window.close(); return false;">❤️ close this ❤️</div>
                     </div>
                 </body>
                 </html>
                 `;
-
                 const blob = new Blob([messageHTML], { type: 'text/html' });
                 const url = URL.createObjectURL(blob);
                 window.open(url, '_blank');
                 setTimeout(() => { URL.revokeObjectURL(url); }, 5000);
             });
 
-            // ---- Helper: get a safe position inside viewport ----
-            function getSafePosition(rect, padding = 20) {
+            // ---- helpers: safe position inside viewport (no scroll) ----
+            function getViewport() {
+                return {
+                    w: window.innerWidth,
+                    h: window.innerHeight
+                };
+            }
+
+            function clampPos(left, top, btnW, btnH, pad = 20) {
                 const vw = window.innerWidth;
                 const vh = window.innerHeight;
-                let left = parseFloat(noBtn.style.left) || 0;
-                let top = parseFloat(noBtn.style.top) || 0;
-
-                // ensure the button doesn't overflow
-                if (left + rect.width > vw - padding) {
-                    left = vw - rect.width - padding;
-                }
-                if (top + rect.height > vh - padding) {
-                    top = vh - rect.height - padding;
-                }
-                if (left < padding) left = padding;
-                if (top < padding) top = padding;
-
+                left = Math.min(Math.max(left, pad), vw - btnW - pad);
+                top = Math.min(Math.max(top, pad), vh - btnH - pad);
                 return { left, top };
             }
 
-            // ---- Move NO button to a random position inside viewport ----
+            // ---- move NO button to random safe position ----
             function moveNoButton() {
-                const noRect = noBtn.getBoundingClientRect();
+                const rect = noBtn.getBoundingClientRect();
+                const bw = rect.width || 140;
+                const bh = rect.height || 70;
                 const vw = window.innerWidth;
                 const vh = window.innerHeight;
                 const pad = 20;
 
-                const bw = noRect.width || 140;
-                const bh = noRect.height || 70;
-
-                // Generate random positions that keep button fully inside
                 const maxX = Math.max(pad, vw - bw - pad);
                 const maxY = Math.max(pad, vh - bh - pad);
-                const minX = pad;
-                const minY = pad;
-
-                let newX = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
-                let newY = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
-
-                // Clamp to be absolutely safe
-                newX = Math.min(Math.max(newX, pad), vw - bw - pad);
-                newY = Math.min(Math.max(newY, pad), vh - bh - pad);
-
+                let newX = Math.floor(Math.random() * (maxX - pad + 1)) + pad;
+                let newY = Math.floor(Math.random() * (maxY - pad + 1)) + pad;
+                // clamp
+                const clamped = clampPos(newX, newY, bw, bh, pad);
                 noBtn.style.position = 'fixed';
-                noBtn.style.left = newX + 'px';
-                noBtn.style.top = newY + 'px';
+                noBtn.style.left = clamped.left + 'px';
+                noBtn.style.top = clamped.top + 'px';
                 noBtn.style.zIndex = '999';
                 noBtn.style.transition = 'left 0.08s ease, top 0.08s ease';
             }
 
-            // ---- Position NO button beside YES initially ----
+            // ---- place NO beside YES initially ----
             function placeNoButtonBesideYes() {
                 const yesRect = yesBtn.getBoundingClientRect();
                 const noWidth = noBtn.offsetWidth || 140;
@@ -382,32 +338,27 @@
                 let leftPos = yesRect.right + gap;
                 let topPos = yesRect.top;
 
-                // If NO would go off-screen to the right, place it below YES
+                // if off right → place below YES
                 if (leftPos + noWidth > vw - pad) {
                     leftPos = yesRect.left;
                     topPos = yesRect.bottom + gap;
                 }
-
-                // If still off-screen (e.g., narrow view), fallback to safe random
+                // if still off (narrow) → random safe
                 if (topPos + noHeight > vh - pad || leftPos + noWidth > vw - pad) {
-                    const safeX = Math.min(Math.max(pad, Math.floor(Math.random() * (vw - noWidth - pad * 2)) + pad), vw - noWidth - pad);
-                    const safeY = Math.min(Math.max(pad, Math.floor(Math.random() * (vh - noHeight - pad * 2)) + pad), vh - noHeight - pad);
-                    leftPos = safeX;
-                    topPos = safeY;
+                    const randX = Math.floor(Math.random() * (vw - noWidth - pad * 2)) + pad;
+                    const randY = Math.floor(Math.random() * (vh - noHeight - pad * 2)) + pad;
+                    leftPos = randX;
+                    topPos = randY;
                 }
-
-                // Final clamp
-                leftPos = Math.min(Math.max(leftPos, pad), vw - noWidth - pad);
-                topPos = Math.min(Math.max(topPos, pad), vh - noHeight - pad);
-
+                const clamped = clampPos(leftPos, topPos, noWidth, noHeight, pad);
                 noBtn.style.position = 'fixed';
-                noBtn.style.left = leftPos + 'px';
-                noBtn.style.top = topPos + 'px';
+                noBtn.style.left = clamped.left + 'px';
+                noBtn.style.top = clamped.top + 'px';
                 noBtn.style.zIndex = '999';
                 noBtn.style.transition = 'left 0.08s ease, top 0.08s ease';
             }
 
-            // ---- Event listeners to make NO button flee ----
+            // ---- flee events ----
             noBtn.addEventListener('mouseover', function(e) {
                 moveNoButton();
             });
@@ -421,40 +372,32 @@
                     top: noRect.top - margin,
                     bottom: noRect.bottom + margin
                 };
-                const mouseX = e.clientX;
-                const mouseY = e.clientY;
-
-                if (mouseX >= dangerZone.left && mouseX <= dangerZone.right &&
-                    mouseY >= dangerZone.top && mouseY <= dangerZone.bottom) {
+                const mx = e.clientX;
+                const my = e.clientY;
+                if (mx >= dangerZone.left && mx <= dangerZone.right &&
+                    my >= dangerZone.top && my <= dangerZone.bottom) {
                     moveNoButton();
                 }
             });
 
-            // Touch events for mobile
             noBtn.addEventListener('touchstart', function(e) {
                 e.preventDefault();
                 moveNoButton();
             });
 
-            // ---- On resize, keep NO button inside viewport ----
+            // ---- keep inside viewport on resize / orientation ----
             window.addEventListener('resize', function() {
-                const noRect = noBtn.getBoundingClientRect();
-                const vw = window.innerWidth;
-                const vh = window.innerHeight;
-                const pad = 20;
+                const rect = noBtn.getBoundingClientRect();
+                const bw = rect.width || 140;
+                const bh = rect.height || 70;
                 let left = parseFloat(noBtn.style.left) || 0;
                 let top = parseFloat(noBtn.style.top) || 0;
-
-                if (left + noRect.width > vw - pad) left = vw - noRect.width - pad;
-                if (top + noRect.height > vh - pad) top = vh - noRect.height - pad;
-                if (left < pad) left = pad;
-                if (top < pad) top = pad;
-
-                noBtn.style.left = left + 'px';
-                noBtn.style.top = top + 'px';
+                const clamped = clampPos(left, top, bw, bh, 20);
+                noBtn.style.left = clamped.left + 'px';
+                noBtn.style.top = clamped.top + 'px';
             });
 
-            // ---- On page load: place NO button beside YES ----
+            // ---- init ----
             function init() {
                 requestAnimationFrame(() => {
                     placeNoButtonBesideYes();
@@ -467,16 +410,14 @@
                 window.addEventListener('load', init);
             }
 
-            // Re-place after a tiny delay to catch any layout shifts
-            setTimeout(() => {
-                placeNoButtonBesideYes();
-            }, 300);
-
-            // Also re-place when orientation changes (useful for mobile)
+            // extra safety after load & orientation
+            setTimeout(() => { placeNoButtonBesideYes(); }, 300);
             window.addEventListener('orientationchange', function() {
-                setTimeout(placeNoButtonBesideYes, 300);
+                setTimeout(placeNoButtonBesideYes, 350);
             });
 
+            // also re-run after a tiny delay to catch any layout shifts
+            setTimeout(() => { placeNoButtonBesideYes(); }, 500);
         })();
     </script>
 
